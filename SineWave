@@ -1,0 +1,156 @@
+
+//With this code I produce 222 spheres which are moving in a sine wave manner... this should represent the wire for my "hot wire game"
+
+
+
+using UnityEngine;
+using System.Collections;
+
+public class SineWaveSpheres : MonoBehaviour {
+
+
+	public GameObject plotPointObject;
+	private float animSpeed =3.0f;
+	private float scaleInputRange = 4*Mathf.PI; // scale number from [0 to 99] to [0 to 2Pi] //Zahl vor Mathf, Anzahl Bön 
+	private float scaleResult = 2.5f; // Y Achse Range
+	private float scaleResult2 =1.0f;
+	public bool animate = true;
+	public Vector3 posSphere;
+	public Vector3 sizeSphere;
+	public Vector3 newpos; 
+	public Vector3 newpos2; 
+	public float overlay = 0.3f; 
+	private Rigidbody currentrb; 
+
+
+	// create an array of 222 rows and 3 columns filled with zeros 
+	public float[,] arrayPosSpheres = new float[222, 3];
+
+
+
+	public Vector3 transformPosition; 
+
+
+
+	GameObject[] plotPoints;
+
+
+	// Use this for initialization
+	void Start () {
+
+
+		if (plotPointObject == null) //if user did not fill in a game object to use for the plot points
+			plotPointObject = GameObject.CreatePrimitive (PrimitiveType.Sphere); //create a sphere
+
+
+
+
+		//add Material to the spheres , load material in the folder Resources/Materials 
+		Material myMaterial = Resources.Load ("Materials/green", typeof(Material)) as Material;
+		plotPointObject.GetComponent<MeshRenderer> ().material = myMaterial;
+
+
+		//change the scale of the spheres 
+		plotPointObject.transform.localScale = Vector3.one * 0.3f;
+
+
+		float sizeSphere = plotPointObject.GetComponent<MeshRenderer> ().bounds.size.x;
+
+
+		plotPoints = new GameObject[(int)(20/(sizeSphere*overlay))]; //creat an array of  points.
+
+
+
+
+
+
+		int numbSpheres = (int)(20/(sizeSphere * overlay));
+
+
+		for (int i = 0; i < numbSpheres; i++) {
+
+			int initialposition = -10; 
+
+
+
+			newpos = new Vector3 (initialposition + (i * sizeSphere*overlay), 0, 0);
+			plotPoints [i] = (GameObject)GameObject.Instantiate (plotPointObject, newpos, Quaternion.identity);
+
+			//add rigidbody to clones 
+			currentrb = plotPoints [i].AddComponent<Rigidbody> ();
+
+			arrayPosSpheres [i,0] = newpos[0];
+
+			arrayPosSpheres [i, 1] = newpos [1];
+
+			arrayPosSpheres [i, 2] = newpos [2];
+
+
+		}
+
+		//arrayPosSpheres [221, 1] = 2;
+
+
+		//we now have an array of points- your should see them in the hierarchy when you hit play
+		plotPointObject.SetActive (false); //hide the original
+
+
+		//print (arrayPosSpheres [0,1]);
+
+
+	}
+
+
+
+
+	// Update is called once per frame 
+	void Update()
+	{
+
+		//
+		float functionXvalue = scaleInputRange; 
+		if (animate) {
+			functionXvalue += Time.time * animSpeed; 
+
+		}
+
+
+		//initalize pos (x,y and z) for the last sphere (222) 
+		arrayPosSpheres [221,1] = ComputeFunction(functionXvalue)*scaleResult;
+
+		//Variante mit unterschiedlicher Amplitude 
+		//arrayPosSpheres [221,1] = ComputeFunction(functionXvalue)*scaleResult+ ComputeFunction(functionXvalue/2)*scaleResult2;
+
+
+		for (int j = 0; j < 221; j++) {
+
+			arrayPosSpheres [j,1] = arrayPosSpheres [j + 1, 1]; 
+
+
+			plotPoints [j].transform.position = new Vector3 (arrayPosSpheres [j, 0], arrayPosSpheres [j, 1], arrayPosSpheres [j, 2]);
+
+
+		}
+
+
+
+
+	}
+
+
+
+
+	float ComputeFunction(float x)
+	{
+		return Mathf.Sin (x);  
+
+	}
+
+
+}
+
+
+
+
+
+
